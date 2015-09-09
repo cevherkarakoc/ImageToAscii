@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<body style="font: 12px/7px consolas">
+<input type="file">
+<br>
+<script>
+	
+	function AsImage(dataURI){
+		var img = this.img = new Image;
+		this.dataURI = dataURI;
+		img.addEventListener("load",this.imageLoaded.bind(this));
+		img.src=this.dataURI;
+	}
+	
+	AsImage.prototype.imageLoaded = function(){
+		var ratio = this.img.width/100;
+		this.img.width = 100;
+		this.img.height /= ratio;
+		
+		this.canvas = document.createElement('canvas');
+		this.canvas.width = this.img.width;
+		this.canvas.height = this.img.height;
+		this.canvasContext = this.canvas.getContext("2d");
+		this.canvasContext.drawImage(this.img,0,0,this.canvas.width,this.canvas.height);
+		
+		var imageData = this.canvasContext.getImageData(0,0,this.canvas.width, this.canvas.height);
+		var data = imageData.data;
+		// # + - .
+		
+		var ascii = ["#","@","%","*", "+","-",":",":","."];
+		
+		for (var i = 0; i < data.length; i += 4) {
+      		var avg = (data[i] + data[i +1] + data[i +2]) / 3;
+      		data[i]     = avg; // red
+      		data[i + 1] = avg; // green
+      		data[i + 2] = avg; // blue
+			var text = document.createElement("span");
+			
+			text.appendChild(document.createTextNode(ascii[Math.floor(((avg+1)/32))]));
+			
+			
+			if(i%400===0){
+				document.body.appendChild(document.createElement("br"));
+			}
+			
+			document.body.appendChild(text);
+    	}
+		
+		document.body.appendChild(document.createElement("br"));
+	}
+	
+	document.addEventListener('DOMContentLoaded', function(event) {
+	var inputEl = document.querySelector('input');
+	
+	document.querySelector('input').addEventListener('change', function() {
+		
+		var file = inputEl.files[0];
+		var reader = new FileReader();
+		reader.onloadend = function () {
+			new AsImage(reader.result);
+		}
+		reader.readAsDataURL(file);
+	});
+});
+</script>
+</body>
