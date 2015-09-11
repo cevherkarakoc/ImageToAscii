@@ -1,7 +1,9 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
 <body style="font: 12px/7px consolas">
-<input type="file">
+<input id="file" type="file">
+<input id="char" type="text">
+<input id="color" type="checkbox" value="true">
 <br>
 <script>
 	
@@ -13,44 +15,62 @@
 	}
 	
 	AsImage.prototype.imageLoaded = function(){
-		var ratio = this.img.width/100;
-		this.img.width = 100;
+		var startTime = (new Date()).getTime();
+		var char = document.getElementById('char').value;
+		var color = document.getElementById("color").checked;
+		var backgroundColor = "white";
+		var ratio = this.img.width/char;
+		this.img.width = char;
 		this.img.height /= ratio;
 		
-		this.canvas = document.createElement('canvas');
-		this.canvas.width = this.img.width;
-		this.canvas.height = this.img.height;
-		this.canvasContext = this.canvas.getContext("2d");
-		this.canvasContext.drawImage(this.img,0,0,this.canvas.width,this.canvas.height);
+		this.imgCanvas = document.createElement('canvas');
+		this.imgCanvas.width = this.img.width;
+		this.imgCanvas.height = this.img.height;
+		this.imgCanvasContext = this.imgCanvas.getContext("2d");
+		this.imgCanvasContext.drawImage(this.img,0,0,this.imgCanvas.width,this.imgCanvas.height);
 		
-		var imageData = this.canvasContext.getImageData(0,0,this.canvas.width, this.canvas.height);
+		var imageData = this.imgCanvasContext.getImageData(0,0,this.imgCanvas.width, this.imgCanvas.height);
 		var data = imageData.data;
-		// # + - .
+		
+		this.asciiCanvas = document.createElement('canvas');
+		this.asciiCanvas.width = char*7;
+		this.asciiCanvas.height = this.img.height*7;
+		this.asciiCanvasContext = this.asciiCanvas.getContext("2d");		
+		this.asciiCanvasContext.font = "12px consolas";
+		this.asciiCanvasContext.fillStyle = backgroundColor;
+		this.asciiCanvasContext.fillRect(0,0,this.asciiCanvas.width,this.asciiCanvas.height)
 		
 		var ascii = ["#","@","%","*", "+","-",":",":","."];
+		var x=0,y=-7;
 		
 		for (var i = 0; i < data.length; i += 4) {
-      		var avg = (data[i] + data[i +1] + data[i +2]) / 3;
-      		data[i]     = avg; // red
-      		data[i + 1] = avg; // green
-      		data[i + 2] = avg; // blue
-			var text = document.createElement("span");
-			
-			text.appendChild(document.createTextNode(ascii[Math.floor(((avg+1)/32))]));
+			var r=data[i], g = data[i +1], b = data[i +2];
+      		var avg = (r + g + b) / 3;
+			var c = ascii[Math.floor(((avg)/30))];
 			
 			
-			if(i%400===0){
-				document.body.appendChild(document.createElement("br"));
+			if(color) this.asciiCanvasContext.fillStyle = "RGB("+r+","+g+","+b+")";
+			else this.asciiCanvasContext.fillStyle = "black";
+			
+			x+=7;
+			if(i%(4*char)===0){
+				y+=7;
+				x=0;
 			}
 			
-			document.body.appendChild(text);
+			this.asciiCanvasContext.fillText(c,x,y);
+			
     	}
 		
+		document.body.appendChild(this.asciiCanvas);
 		document.body.appendChild(document.createElement("br"));
+		
+		console.log((new Date()).getTime() - startTime);
 	}
 	
 	document.addEventListener('DOMContentLoaded', function(event) {
-	var inputEl = document.querySelector('input');
+	var inputEl = document.getElementById('file');
+	
 	
 	document.querySelector('input').addEventListener('change', function() {
 		
