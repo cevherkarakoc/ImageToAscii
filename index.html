@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
 <body style="font: 12px/7px consolas">
-<input id="file" type="file">
-<input id="char" type="text">
-<input id="color" type="checkbox" value="true">
-<br>
+<input id="file" type="file" accept="image/*"> <br> <br>
+<span>Width : </span> <input id="char" type="text" value="100"> <span>characters</span> <br> <br>
+<span>Background-color : </span> <input id="backgroundColor" type="text" value="white"> <span>(example:"blue", "#609164" ,rgb(145,96,141))</span> <br> <br>
+<span>Color : </span> <input id="color" type="checkbox" value="true"> <br> <br>
 <script>
 	
 	function AsImage(dataURI){
@@ -17,40 +17,40 @@
 	AsImage.prototype.imageLoaded = function(){
 		var startTime = (new Date()).getTime();
 		var char = document.getElementById('char').value;
-		var color = document.getElementById("color").checked;
-		var backgroundColor = "white";
+		var color = document.getElementById('color').checked;
+		var backgroundColor = document.getElementById('backgroundColor').value;
+		
 		var ratio = this.img.width/char;
 		this.img.width = char;
 		this.img.height /= ratio;
 		
-		this.imgCanvas = document.createElement('canvas');
-		this.imgCanvas.width = this.img.width;
-		this.imgCanvas.height = this.img.height;
-		this.imgCanvasContext = this.imgCanvas.getContext("2d");
-		this.imgCanvasContext.drawImage(this.img,0,0,this.imgCanvas.width,this.imgCanvas.height);
+		this.canvas = document.createElement('canvas');
+		this.canvas.width = this.img.width;
+		this.canvas.height = this.img.height;
+		this.canvasContext = this.canvas.getContext("2d");
+		this.canvasContext.drawImage(this.img,0,0,this.canvas.width,this.canvas.height);
 		
-		var imageData = this.imgCanvasContext.getImageData(0,0,this.imgCanvas.width, this.imgCanvas.height);
+		var imageData = this.canvasContext.getImageData(0,0,this.canvas.width, this.canvas.height);
 		var data = imageData.data;
 		
-		this.asciiCanvas = document.createElement('canvas');
-		this.asciiCanvas.width = char*7;
-		this.asciiCanvas.height = this.img.height*7;
-		this.asciiCanvasContext = this.asciiCanvas.getContext("2d");		
-		this.asciiCanvasContext.font = "12px consolas";
-		this.asciiCanvasContext.fillStyle = backgroundColor;
-		this.asciiCanvasContext.fillRect(0,0,this.asciiCanvas.width,this.asciiCanvas.height)
+		this.canvas.width = char*7;
+		this.canvas.height = this.img.height*7;
+		this.canvasContext = this.canvas.getContext("2d");		
+		this.canvasContext.font = "12px consolas";
+		this.canvasContext.fillStyle = backgroundColor;
+		this.canvasContext.fillRect(0,0,this.canvas.width,this.canvas.height)
 		
 		var ascii = ["#","@","%","*", "+","-",":",":","."];
 		var x=0,y=-7;
 		
+		var r,g,b,avg,c;
 		for (var i = 0; i < data.length; i += 4) {
-			var r=data[i], g = data[i +1], b = data[i +2];
-      		var avg = (r + g + b) / 3;
-			var c = ascii[Math.floor(((avg)/30))];
+			r=data[i], g = data[i +1], b = data[i +2];
+      		avg = (r + g + b) / 3;
+			c = ascii[Math.floor(avg/30)];
 			
-			
-			if(color) this.asciiCanvasContext.fillStyle = "RGB("+r+","+g+","+b+")";
-			else this.asciiCanvasContext.fillStyle = "black";
+			if(color) this.canvasContext.fillStyle = "RGB("+r+","+g+","+b+")";
+			else this.canvasContext.fillStyle = "black";
 			
 			x+=7;
 			if(i%(4*char)===0){
@@ -58,19 +58,18 @@
 				x=0;
 			}
 			
-			this.asciiCanvasContext.fillText(c,x,y);
-			
+			this.canvasContext.fillText(c,x,y);	
     	}
 		
-		document.body.appendChild(this.asciiCanvas);
+		document.body.appendChild(this.canvas);
 		document.body.appendChild(document.createElement("br"));
 		
 		console.log((new Date()).getTime() - startTime);
 	}
 	
+	
 	document.addEventListener('DOMContentLoaded', function(event) {
 	var inputEl = document.getElementById('file');
-	
 	
 	document.querySelector('input').addEventListener('change', function() {
 		
