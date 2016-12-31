@@ -1,24 +1,26 @@
-import React, {Component} from 'react';
-import {bindActionCreators} from 'redux';
-import {connect} from 'react-redux';
+import React, {Component} from 'react'
+import {connect} from 'react-redux'
 
-class Background extends Component{
-    render(){
-        var style = {backgroundColor : this.props.background}
-        return (
-            <div style={style} className="cover">
-                {this.props.children}
-            </div>
-        );
+class Background extends Component {
+  render () {
+    var style = {
+      backgroundColor: this.props.background,
+      display: 'inline-block',
+      padding: 9
     }
+    return (
+      <div style={style}>
+        {this.props.children}
+      </div>
+    )
+  }
 
 }
 
-function mapStateToProps(state) {
-    return {
-        background: state.values.background
-    }
-
+function mapStateToProps (state) {
+  return {
+    background: state.values.background
+  }
 }
 
-export default connect(mapStateToProps)(Background);
+export default connect(mapStateToProps)(Background)
